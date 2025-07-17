@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "AliExpress Extractor",
+  "description": "שליפת נתוני מוצר כולל קישור שותף",
+  "version": "1.0",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["https://*.aliexpress.com/*"],
+  "action": {
+    "default_title": "שלוף נתונים",
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

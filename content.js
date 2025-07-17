@@ -1,5 +1,3 @@
-// פונקציות עזר
-
 function getPrice() {
   const span = document.querySelector('span.price--currentPriceText--V8_y_b5.pdp-comp-price-current.product-price-value');
   if (!span) return null;
