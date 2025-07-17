@@ -236,8 +236,8 @@ async function getFullProductData() {
   data.desc = getDescription();
 
   data.rating = getRatingFromText();
-  // data.sales = getUnitsSold();
-  data.sales = getRoundedSales();
+  data.sales = getUnitsSold();
+  // data.sales = getRoundedSales();
   data.shipping = getFormattedShippingInfo();
   data.price = getPrice();
   data.discount = getDiscount();
