@@ -56,6 +56,30 @@ function getUnitsSold() {
   const num = parseInt(raw);
   return isNaN(num) ? null : num;
 }
+function getRoundedSales() {
+  const el = document.querySelector('span.reviewer--sold--ytPeoEy');
+  if (!el) return null;
+
+  // חילוץ מספר בלבד מתוך הטקסט (למשל: "171 נמכרנמכר" → 171)
+  const raw = el.innerText.replace(/[^\d]/g, '');
+  let num = parseInt(raw);
+  if (isNaN(num)) return null;
+
+  // עיגול כלפי מטה לפי הטווח
+  if (num < 500) {
+    num = Math.floor(num / 10) * 10;
+  } else if (num < 1000) {
+    num = Math.floor(num / 100) * 100;
+  } else if (num < 10000) {
+    num = Math.floor(num / 1000) * 1000;
+  } else if (num < 100000) {
+    num = Math.floor(num / 10000) * 10000;
+  } else {
+    num = Math.floor(num / 100000) * 100000;
+  }
+
+  return num;
+}
 
 // המתנה אלמנט עם תוכן
 function clickGetLinkAndExtractUrl() {
@@ -212,7 +236,8 @@ async function getFullProductData() {
   data.desc = getDescription();
 
   data.rating = getRatingFromText();
-  data.sales = getUnitsSold();
+  // data.sales = getUnitsSold();
+  data.sales = getRoundedSales();
   data.shipping = getFormattedShippingInfo();
   data.price = getPrice();
   data.discount = getDiscount();
