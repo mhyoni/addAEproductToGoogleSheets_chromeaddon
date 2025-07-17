@@ -206,30 +206,6 @@ function getFormattedShippingInfo() {
   return '';// ברירת מחדל
 }
 
-// function getFormattedShippingInfo() {
-//   const container = document.querySelector('.dynamic-shipping-line.dynamic-shipping-titleLayout');
-//   if (!container) return null;
-
-//   const rawText = [...container.childNodes]
-//     .filter(node => node.nodeType === Node.TEXT_NODE || node.nodeType === Node.ELEMENT_NODE)
-//     .map(node => node.innerText || node.textContent || '')
-//     .join(' ')
-//     .replace(/\s+/g, ' ')
-//     .trim();
-
-//   // התאמה לפי תוכן הטקסט
-//   if (rawText.includes('איסוף חינם ברכישה מעל')) 
-//     return '📦 משלוח חינם מעל 42 ₪';
-//   else if (rawText.includes('איסוף חינם')) 
-//     return '📦 משלוח חינם';
-//   else if (rawText.includes('משלוח חינם') && rawText.includes('מ Israel')) 
-//     return '📦 משלוח חינם ומהיר מהמחסן בארץ';
-
-//   // ברירת מחדל: להחזיר את הטקסט המקורי
-//   return `📦 ${rawText}`;
-// }
-
-
 // פונקציה ראשית שמחזירה את כל המידע
 async function getFullProductData() {
   const data = {};
@@ -258,13 +234,6 @@ async function getFullProductData() {
 
 
 // הרצה והצגה
-// console.log(JSON.stringify(getFullProductData(), null, 2));
-// getFullProductData().then(data => { console.log(JSON.stringify(data, null, 2)); });
-// (async () => {
-//   const data = await getFullProductData();
-//   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
-// })();
-
 (async () => {
   const data = await getFullProductData();
   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
