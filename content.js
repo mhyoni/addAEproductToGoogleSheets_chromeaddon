@@ -214,7 +214,7 @@ function getFormattedShippingInfo() {
     .trim();
 
   // אם יש סימן ₪ – המשלוח בתשלום
-  
+
   if (rawText.includes('חינם ברכישה מעל'))
     return '📦 משלוח חינם מעל 42 ₪';
   else if (rawText.includes('איסוף חינם'))
@@ -223,7 +223,7 @@ function getFormattedShippingInfo() {
     return '📦 משלוח חינם ומהיר מהמחסן בארץ';
   else if (rawText.includes('משלוח חינם'))
     return '📦 משלוח חינם';
-  else if (rawText.includes('₪')) 
+  else if (rawText.includes('₪'))
     return '';
   return '';// ברירת מחדל
 }
@@ -236,8 +236,8 @@ async function getFullProductData() {
   data.desc = getDescription();
 
   data.rating = getRatingFromText();
-  data.sales = getUnitsSold();
-  // data.sales = getRoundedSales();
+  // data.sales = getUnitsSold();
+  data.sales = getRoundedSales();
   data.shipping = getFormattedShippingInfo();
   data.price = getPrice();
   data.discount = getDiscount();
@@ -274,11 +274,21 @@ function sendToWebhook(data) {
       'Content-Type': 'application/json'
     }
   })
-  .then(res => res.text())
-  .then(responseText => {
-    console.log('✅ הנתונים נשלחו ל־Make בהצלחה:', responseText);
-  })
-  .catch(error => {
-    console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
-  });
+    .then(res => res.json())
+    .then(response => {
+      const closeButton = document.querySelector('.next-balloon-close');
+      if (closeButton) {
+        closeButton.click(); // לוחץ עליו
+      } else {
+        console.warn('❌ לא נמצא האלמנט עם next-balloon-close');
+      }
+
+      alert(response.value); // ok
+      console.log(response.value); // 123.45
+    })
+
+    .catch(error => {
+      console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
+    });
 }
+
