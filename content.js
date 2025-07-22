@@ -31,11 +31,27 @@ function getVideoUrl() {
   if (videoEl) {
     const sourceEl = videoEl.querySelector('source');
     if (sourceEl && sourceEl.src) {
-      return sourceEl.src;
+      let url = sourceEl.src;
+      if (url.endsWith('&definition=h265')) {
+        url = url.slice(0, -'&definition=h265'.length);
+      }
+      return url;
     }
   }
   return null;
 }
+
+
+// function getVideoUrl() {
+//   const videoEl = document.querySelector('video.video--video--bsRAdyg');
+//   if (videoEl) {
+//     const sourceEl = videoEl.querySelector('source');
+//     if (sourceEl && sourceEl.src) {
+//       return sourceEl.src;
+//     }
+//   }
+//   return null;
+// }
 
 function getRatingFromText() {
   const strongs = document.querySelectorAll('strong');
@@ -259,6 +275,13 @@ async function getFullProductData() {
 // הרצה והצגה
 (async () => {
   const data = await getFullProductData();
+  // data.desc = data.desc.replace(/\n/g, "\\n");
+  data.desc = data.desc
+  .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
+  .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
+  .replace(/\r/g, "")          // הסרת carriage return אם יש
+  .trim();
+
   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
   sendToWebhook(data);
 })();
