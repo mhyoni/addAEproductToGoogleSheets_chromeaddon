@@ -277,41 +277,122 @@ async function getFullProductData() {
   const data = await getFullProductData();
   // data.desc = data.desc.replace(/\n/g, "\\n");
   data.desc = data.desc
-  .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
-  .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
-  .replace(/\r/g, "")          // הסרת carriage return אם יש
-  .trim();
+    .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
+    .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
+    .replace(/\r/g, "")          // הסרת carriage return אם יש
+    .trim();
 
   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
   sendToWebhook(data);
 })();
 
-
+simple = false;
 function sendToWebhook(data) {
-  const url = 'https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte56arq1ri4xq';
-
-  fetch(url, {
-    method: 'POST',
-    body: JSON.stringify(data),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(res => res.json())
-    .then(response => {
-      const closeButton = document.querySelector('.next-balloon-close');
-      if (closeButton) {
-        closeButton.click(); // לוחץ עליו
-      } else {
-        console.warn('❌ לא נמצא האלמנט עם next-balloon-close');
+  if (simple) {
+    const url = 'https://hook.eu2.make.com/jmow52wzuan9e9kcdm8m32afq9wprxxu';
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
       }
-
-      alert(response.value); // ok
-      console.log(response.value); // 123.45
     })
+      .then(res => res.json())
+      .then(response => {
+        const closeButton = document.querySelector('.next-balloon-close');
+        if (closeButton) {
+          closeButton.click(); // לוחץ עליו
+        } else {
+          console.warn('❌ לא נמצא האלמנט עם next-balloon-close');
+        }
 
-    .catch(error => {
-      console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
-    });
+        alert(response.value); // ok
+        console.log(response.value); // 123.45
+      })
+
+      .catch(error => {
+        console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
+      });
+  }
+
+  else {
+    const url = 'https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte56arq1ri4xq';
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+      .then(res => res.json())
+      .then(gptData => {
+        // debugger;
+        showEditForm(gptData); // מציג את הטופס לעריכה
+      })
+      .catch(err => {
+        console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
+        alert("לא התקבלה תשובה מ־Make");
+      });
+  }
 }
 
+
+//המשך עם טופס לעריכת כותרת ותיאור מצאט גפט
+function showEditForm(gptData) {
+  // gptData = JSON.parse(gptData);
+  // הסרת טופס קודם אם קיים
+  const oldForm = document.getElementById("alix-editor-popup");
+  if (oldForm) oldForm.remove();
+
+  // יצירת אלמנט
+  const div = document.createElement("div");
+  div.innerHTML = `<div id="alix-editor-popup" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%);
+background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-shadow: 0 0 10px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
+  <h2 style="margin-top: 0; font-size: 18px;">✍️ ערוך לפני שליחה</h2>
+  <label style="font-weight: bold;">שורה:</label><br/>
+  <input id="alix-row" type="text" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px; margin-bottom: 10px;"><br/>
+  <label style="font-weight: bold;">כותרת:</label><br/>
+  <input id="alix-title" type="text" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px; margin-bottom: 10px;"><br/>
+  <label style="font-weight: bold;">תיאור:</label><br/>
+  <textarea id="alix-desc" rows="6" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px;"></textarea><br/>
+  <button id="alix-submit" style="margin-top: 10px; padding: 6px 12px; background-color: #4CAF50; color: white; border: none;">שמור ושלח</button>
+  <button id="alix-cancel" style="margin-top: 10px; padding: 6px 12px; background-color: #ccc; border: none;">ביטול</button>
+</div>`;
+
+  document.body.appendChild(div);
+
+  // מילוי שדות
+  document.getElementById("alix-title").value = gptData.title || "";
+  document.getElementById("alix-desc").value = gptData.description || "";
+  document.getElementById("alix-row").value = gptData.rownumber || "";
+
+  // האזנה ללחצנים
+  document.getElementById("alix-submit").onclick = () => {
+    const updated = {
+      title: document.getElementById("alix-title").value.trim(),
+      description: document.getElementById("alix-desc").value.trim(),
+      rownumber: document.getElementById("alix-row").value.trim()
+    };
+
+    fetch("https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated)
+    })
+      .then(res => res.json())
+      .then(response => {
+        div.remove();
+
+        alert(response.value); // ok
+        console.log(response.value); // 123.45
+      })
+      // .then(() => {
+      //   alert("✅ נשמר בהצלחה!");
+      //   div.remove();
+      // })
+      .catch((err) => {
+        console.error("❌ שגיאה בשליחה:", err);
+        alert("שגיאה בשליחה ל-Make");
+      });
+  };
+
+  document.getElementById("alix-cancel").onclick = () => div.remove();
+}
