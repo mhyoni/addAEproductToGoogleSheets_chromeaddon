@@ -1,0 +1,101 @@
+{
+    "title":    "Hebcal Diaspora August 2025",
+    "date":     "2025-08-05T11:33:40.474Z",
+    "version":  "5.10.1-3.4.3",
+    "location": {"geo":"none"},
+    "range":    {"start":"2025-08-02","end":"2025-08-25"},
+        
+    "items":
+    [
+        {
+            "title":    "שַׁבַּת חֲזוֹן",
+            "date":     "2025-08-02",
+            "hdate":    "8 Av 5785",
+            "category": "holiday",
+            "subcat":   "shabbat",
+            "title_orig":"Shabbat Chazon",
+            "hebrew":   "שבת חזון",
+    "link":     "https://hebcal.com/h/shabbat-chazon-2025?us=&um=api",
+            "memo":     "Shabbat of Prophecy/Shabbat of Vision. Shabbat before Tish’a B’Av"
+        },
+        {
+            "title":    "עֶרֶב תִּשְׁעָה בְּאָב",
+            "date":     "2025-08-02",
+            "hdate":    "8 Av 5785",
+            "category": "holiday",
+            "subcat":   "major",
+            "title_orig":"Erev Tish'a B'Av",
+            "hebrew":   "ערב תשעה באב","leyning":{"torah":"Lamentations 1:1-5:22"},
+    "link":     "https://hebcal.com/h/tisha-bav-2025?us=&um=api",
+            "memo":     "The Ninth of Av. Fast commemorating the destruction of the two Temples"
+        },
+        {
+        "title":    "תִּשְׁעָה בְּאָב",
+        "date":     "2025-08-03",
+            "hdate":    "9 Av 5785",
+            "category": "holiday",
+            "subcat":   "major",
+            "title_orig":"Tish'a B'Av",
+            "hebrew":   "תשעה באב","leyning":{"1":"Deuteronomy 4:25-4:29","2":"Deuteronomy 4:30-4:35","3":"Deuteronomy 4:36-4:40","torah":"Deuteronomy 4:25-40; Lamentations 1:1-5:22","haftarah":"Jeremiah 8:13-9:23"},
+    "link":     "https://hebcal.com/h/tisha-bav-2025?us=&um=api",
+        "memo":     "The Ninth of Av. Fast commemorating the destruction of the two Temples"
+    },
+        {
+        "title":    "ט״וּ בְּאָב",
+            "date":     "2025-08-09",
+            "hdate":    "15 Av 5785",
+            "category": "holiday",
+            "subcat":   "minor",
+            "title_orig":"Tu B'Av",
+            "hebrew":   "ט״ו באב",
+    "link":     "https://hebcal.com/h/tu-bav-2025?us=&um=api",
+            "memo":     "Minor Jewish holiday of love. Observed on the 15th day of the Hebrew month of Av"
+    },
+        {
+        "title":    "שַׁבַּת נַחֲמוּ",
+        "date":     "2025-08-09",
+            "hdate":    "15 Av 5785",
+            "category": "holiday",
+            "subcat":   "shabbat",
+            "title_orig":"Shabbat Nachamu",
+            "hebrew":   "שבת נחמו",
+    "link":     "https://hebcal.com/h/shabbat-nachamu-2025?us=&um=api",
+            "memo":     "Shabbat after Tish’a B’Av (Shabbat of Consolation). The first of seven Shabbatot leading up to Rosh Hashanah. Named after the Haftarah (from Isaiah 40) which begins with the verse נַחֲמוּ נַחֲמוּ, עַמִּי (“Comfort, oh comfort my people”)"
+    },
+        {
+        "title":    "רֹאשׁ חוֹדֶשׁ אֱלוּל",
+        "date":     "2025-08-24",
+        "hdate":    "30 Av 5785",
+        "category": "roshchodesh",
+            "title_orig":"Rosh Chodesh Elul",
+            "hebrew":   "ראש חודש אלול","leyning":{"1":"Numbers 28:1-28:3","2":"Numbers 28:3-28:5","3":"Numbers 28:6-28:10","4":"Numbers 28:11-28:15","torah":"Numbers 28:1-15"},
+    "link":     "https://hebcal.com/h/rosh-chodesh-elul-2025?us=&um=api",
+            "memo":     "Start of month of Elul on the Hebrew calendar. Elul (אֱלוּל) is the 12th month of the civil Hebrew year (13th on leap years) and the 6th month of the biblical Hebrew year. It has 29 days and corresponds to August or September on the Gregorian calendar. רֹאשׁ חוֹדֶשׁ, transliterated Rosh Chodesh or Rosh Hodesh, is a minor holiday that occurs at the beginning of every month in the Hebrew calendar. It is marked by the birth of a new moon"
+    },
+        {
+            "title":    "רֹאשׁ הַשָּׁנָה לְמַעְשַׂר בְּהֵמָה",
+            "date":     "2025-08-25",
+            "hdate":    "1 Elul 5785",
+            "category": "holiday",
+            "subcat":   "minor",
+            "title_orig":"Rosh Hashana LaBehemot",
+            "hebrew":   "ראש השנה למעשר בהמה",
+    "link":     "https://hebcal.com/h/rosh-hashana-labehemot-2025?us=&um=api",
+            "memo":     "New Year for Tithing Animals"
+        },
+        {
+            "title":    "רֹאשׁ חוֹדֶשׁ אֱלוּל",
+            "date":     "2025-08-25",
+            "hdate":    "1 Elul 5785",
+            "category": "roshchodesh",
+            "title_orig":"Rosh Chodesh Elul",
+            "hebrew":   "ראש חודש אלול","leyning":{"1":"Numbers 28:1-28:3","2":"Numbers 28:3-28:5","3":"Numbers 28:6-28:10","4":"Numbers 28:11-28:15","torah":"Numbers 28:1-15"},
+    "link":     "https://hebcal.com/h/rosh-chodesh-elul-2025?us=&um=api",
+            "memo":     "Start of month of Elul on the Hebrew calendar. Elul (אֱלוּל) is the 12th month of the civil Hebrew year (13th on leap years) and the 6th month of the biblical Hebrew year. It has 29 days and corresponds to August or September on the Gregorian calendar. רֹאשׁ חוֹדֶשׁ, transliterated Rosh Chodesh or Rosh Hodesh, is a minor holiday that occurs at the beginning of every month in the Hebrew calendar. It is marked by the birth of a new moon"
+        }
+    ]
+}
+
+
+
+https://www.hebcal.com/hebcal?cfg=json&v=1&year=2025&ny=1&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&o=on&s=on&d=on&c=on&i=on&lg=he

@@ -1,15 +1,39 @@
 function getPrice() {
-  const span = document.querySelector('span.price--currentPriceText--V8_y_b5.pdp-comp-price-current.product-price-value');
+  let span = null;
+  span = document.querySelector('span.price--currentPriceText--V8_y_b5.pdp-comp-price-current.product-price-value');
+  if (!span)
+    span = document.querySelector('span[class="price-default--current--F8OlYIo"]');
+
   if (!span) return null;
   const price = Math.round(parseFloat(span.innerText.replace(/[^\d.]/g, '')));
   return price;
 }
 
+// function getDiscount() {
+//   const discountEl = document.querySelector('span.price--discount--Y9uG2LK');
+//   if (!discountEl) return null;
+//   return parseInt(discountEl.innerText.replace('הנחה', '').replace('%', '').trim());
+// }
+
 function getDiscount() {
-  const discountEl = document.querySelector('span.price--discount--Y9uG2LK');
-  if (!discountEl) return null;
-  return parseInt(discountEl.innerText.replace('הנחה', '').replace('%', '').trim());
+  // ניסיון ראשון – הסלקטור שלך
+  const discountEl1 = document.querySelector('span.price--discount--Y9uG2LK');
+  if (discountEl1) {
+    const text1 = discountEl1.innerText.replace('הנחה', '').replace('%', '').trim();
+    const value1 = parseInt(text1);
+    if (!isNaN(value1)) return value1;
+  }
+
+  // ניסיון שני – סלקטור חלופי
+  const discountEl2 = document.querySelector('.price-default--discount--TvyYuVE bdi');
+  if (discountEl2) {
+    const match = discountEl2.innerText.match(/(\d+)%/);
+    if (match) return parseInt(match[1], 10);
+  }
+
+  return null;
 }
+
 
 function getDirectCommission() {
   const labels = document.querySelectorAll('.commissions .label');
@@ -361,7 +385,7 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
 
   // מילוי שדות
   document.getElementById("alix-title").value = gptData.title || "";
-  document.getElementById("alix-desc").value = gptData.description || "";
+  document.getElementById("alix-desc").value = `\n${gptData.description}` || "";
   document.getElementById("alix-row").value = gptData.rownumber || "";
 
   // האזנה ללחצנים
