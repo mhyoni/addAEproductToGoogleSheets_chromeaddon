@@ -1,23 +1,9 @@
-chrome.action.onClicked.addListener((tab) => {
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: () => runManualExtraction()
-  });
-});
-
-
-// chrome.action.onClicked.addListener((tab) => {
-//   chrome.scripting.executeScript({
-//     target: { tabId: tab.id },
-//     files: ['content.js']
-//   });
-// });
-
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     const url = new URL(tab.url);
     const params = url.searchParams;
 
+    // אם יש update=1 ⇒ מצב עדכון
     if (params.get("update") === "1") {
       const sheetId = params.get("id") || "";
       const row = params.get("row") || "";
@@ -28,14 +14,28 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         target: { tabId: tabId },
         files: ['content.js']
       }, () => {
-        chrome.tabs.sendMessage(tabId, {
-          type: "AUTO_UPDATE",
-          sheetId,
-          row,
-          gid,
-          sheetName
-        });
+        // המתנה קצרה לפני שליחת ההודעה
+        setTimeout(() => {
+          chrome.tabs.sendMessage(tabId, {
+            type: "AUTO_UPDATE",
+            sheetId,
+            row,
+            gid,
+            sheetName
+          });
+        }, 500); // חצי שנייה – לרוב מספיק
+      });
+
+    } else {
+      // אחרת – טוען את content.js אבל לא מריץ כלום
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content.js']
       });
     }
   }
+});
+
+chrome.action.onClicked.addListener((tab) => {
+  chrome.tabs.sendMessage(tab.id, { type: "MANUAL_EXTRACTION" });
 });

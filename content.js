@@ -6,6 +6,12 @@ window.WEBHOOK_REFRESH_DATA = "https://hook.eu2.make.com/m2059yc72x5atvsdesflldp
 // const WEBHOOK_REFRESH_DATA = "https://hook.eu2.make.com/m2059yc72x5atvsdesflldpojs6khgyr";
 // const WEBHOOK_CREATE_PHASE_2 = "https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh"; // לשמירה אחרי עריכה
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "MANUAL_EXTRACTION") {
+    runManualExtraction();
+  }
+});
+
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.type === "AUTO_UPDATE") {
@@ -16,7 +22,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     data.gid = request.gid;
     data.sheetname = request.sheetName;
     data.sheetId = request.sheetId;
-    console.log(data);
+    // console.log(data);
 
     fetch(window.WEBHOOK_REFRESH_DATA, {
       method: "POST",
@@ -387,18 +393,18 @@ async function runManualExtraction() {
   sendToWebhook(data);
 }
 
-// (async () => {
-//   const data = await getFullProductData();
-//   // data.desc = data.desc.replace(/\n/g, "\\n");
-//   data.desc = data.desc
-//     .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
-//     .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
-//     .replace(/\r/g, "")          // הסרת carriage return אם יש
-//     .trim();
+async function runNewItem() {
+  const data = await getFullProductData();
+  // data.desc = data.desc.replace(/\n/g, "\\n");
+  data.desc = data.desc
+    .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
+    .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
+    .replace(/\r/g, "")          // הסרת carriage return אם יש
+    .trim();
 
-//   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
-//   sendToWebhook(data);
-// })();
+  console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
+  sendToWebhook(data);
+};
 
 simple = false;
 function sendToWebhook(data) {
