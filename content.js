@@ -1,3 +1,38 @@
+window.WEBHOOK_CREATE_PHASE_1 = "https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte56arq1ri4xq";
+window.WEBHOOK_CREATE_PHASE_2 = "https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh";
+window.WEBHOOK_REFRESH_DATA = "https://hook.eu2.make.com/m2059yc72x5atvsdesflldpojs6khgyr";
+
+// const WEBHOOK_CREATE_PHASE_1 = "https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte56arq1ri4xq";
+// const WEBHOOK_REFRESH_DATA = "https://hook.eu2.make.com/m2059yc72x5atvsdesflldpojs6khgyr";
+// const WEBHOOK_CREATE_PHASE_2 = "https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh"; // לשמירה אחרי עריכה
+
+
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  if (request.type === "AUTO_UPDATE") {
+    console.log("🚀 הפעלה אוטומטית בזיהוי update=1");
+
+    const data = await getFullProductData(true);
+    data.rownumber = request.row;
+    data.gid = request.gid;
+    data.sheetname = request.sheetName;
+    data.sheetId = request.sheetId;
+    console.log(data);
+
+    fetch(window.WEBHOOK_REFRESH_DATA, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+      .then(() => {
+        console.log("✅ נשלח ל־Webhook של עדכון");
+        window.close();
+      })
+      .catch((err) => console.error("❌ שגיאה בשליחה ל־Webhook של עדכון:", err));
+  }
+});
+
+
+
 function getPrice() {
   let span = null;
   span = document.querySelector('span.price--currentPriceText--V8_y_b5.pdp-comp-price-current.product-price-value');
@@ -122,6 +157,46 @@ function getRoundedSales() {
 }
 
 // המתנה אלמנט עם תוכן
+// function clickGetLinkAndExtractUrl() {
+//   return new Promise((resolve, reject) => {
+//     const buttons = document.querySelectorAll('[class*="btn"]');
+//     let targetButton = null;
+
+//     for (const btn of buttons) {
+//       if (btn.innerText && btn.innerText.includes('לקבל קישור כ')) {
+//         targetButton = btn;
+//         break;
+//       }
+//     }
+
+//     if (!targetButton) {
+//       console.warn('⚠️ לא נמצא כפתור עם הטקסט "לקבל קישור כ"');
+//       return reject('כפתור לא נמצא');
+//     }
+
+//     targetButton.click();
+
+//     let tries = 0;
+//     const maxTries = 20;
+
+//     const interval = setInterval(() => {
+//       const inputs = document.querySelectorAll('[value^="https://s.click.aliexpress.com/e/"]');
+
+//       if (inputs.length > 0) {
+//         clearInterval(interval);
+//         const link = inputs[0].value.trim();
+//         console.log('✅ קישור שותף נמצא:', link);
+//         resolve(link); // כאן הוא מחזיר את הקישור
+//       }
+
+//       tries++;
+//       if (tries >= maxTries) {
+//         clearInterval(interval);
+//         reject('⏰ Timeout: לא נמצא קישור שותף');
+//       }
+//     }, 300);
+//   });
+// }
 function clickGetLinkAndExtractUrl() {
   return new Promise((resolve, reject) => {
     const buttons = document.querySelectorAll('[class*="btn"]');
@@ -162,6 +237,7 @@ function clickGetLinkAndExtractUrl() {
     }, 300);
   });
 }
+
 
 function getMainImageUrl() {
   const el = document.querySelector('.magnifier--image--RM17RL2.magnifier--zoom--zzDgZB8');
@@ -269,11 +345,19 @@ function getFormattedShippingInfo() {
 }
 
 // פונקציה ראשית שמחזירה את כל המידע
-async function getFullProductData() {
+async function getFullProductData(update = false) {
   const data = {};
-  const nameEl = document.querySelector('h1[data-pl="product-title"]');
-  data.product_name = nameEl ? nameEl.innerText.trim() : null;
-  data.desc = getDescription();
+  if (!update) {
+    const nameEl = document.querySelector('h1[data-pl="product-title"]');
+    data.product_name = nameEl ? nameEl.innerText.trim() : null;
+    data.desc = getDescription();
+    try {
+      data.affiliate_link = await clickGetLinkAndExtractUrl(); // תחכה כאן עד שמתקבל קישור
+    } catch (err) {
+      console.warn('❌ לא הצלחנו לקבל את הקישור השותף:', err);
+      data.affiliate_link = null;
+    }
+  }
 
   data.rating = getRatingFromText();
   // data.sales = getUnitsSold();
@@ -284,12 +368,6 @@ async function getFullProductData() {
   data.commission = getDirectCommission();
   data.video = getVideoUrl();
   data.img = getMainImageUrl();
-  try {
-    data.affiliate_link = await clickGetLinkAndExtractUrl(); // תחכה כאן עד שמתקבל קישור
-  } catch (err) {
-    console.warn('❌ לא הצלחנו לקבל את הקישור השותף:', err);
-    data.affiliate_link = null;
-  }
 
   return data;
 }
@@ -297,18 +375,30 @@ async function getFullProductData() {
 
 
 // הרצה והצגה
-(async () => {
+async function runManualExtraction() {
   const data = await getFullProductData();
-  // data.desc = data.desc.replace(/\n/g, "\\n");
   data.desc = data.desc
-    .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
-    .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
-    .replace(/\r/g, "")          // הסרת carriage return אם יש
+    .replace(/\n/g, "\\n")
+    .replace(/"/g, '\\"')
+    .replace(/\r/g, "")
     .trim();
 
   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
   sendToWebhook(data);
-})();
+}
+
+// (async () => {
+//   const data = await getFullProductData();
+//   // data.desc = data.desc.replace(/\n/g, "\\n");
+//   data.desc = data.desc
+//     .replace(/\n/g, "\\n")        // מעברי שורה → תו `\n`
+//     .replace(/"/g, '\\"')         // גרשיים כפולים → `\"`
+//     .replace(/\r/g, "")          // הסרת carriage return אם יש
+//     .trim();
+
+//   console.log('📦 כל הנתונים:', JSON.stringify(data, null, 2));
+//   sendToWebhook(data);
+// })();
 
 simple = false;
 function sendToWebhook(data) {
@@ -340,8 +430,7 @@ function sendToWebhook(data) {
   }
 
   else {
-    const url = 'https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte56arq1ri4xq';
-    fetch(url, {
+    fetch(window.WEBHOOK_CREATE_PHASE_1, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -396,7 +485,7 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
       rownumber: document.getElementById("alix-row").value.trim()
     };
 
-    fetch("https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh", {
+    fetch(window.WEBHOOK_CREATE_PHASE_2, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated)
