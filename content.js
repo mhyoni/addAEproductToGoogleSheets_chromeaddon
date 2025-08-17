@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     data.gid = request.gid;
     data.sheetname = request.sheetName;
     data.sheetId = request.sheetId;
-    // console.log(data);
+    console.log(data);
 
     fetch(window.WEBHOOK_REFRESH_DATA, {
       method: "POST",
@@ -342,7 +342,7 @@ function getFormattedShippingInfo() {
   else if (rawText.includes('איסוף חינם'))
     return '📦 משלוח חינם';
   else if (rawText.includes('משלוח חינם') && rawText.includes('מ Israel'))
-    return '📦 משלוח חינם ומהיר מהמחסן בארץ';
+    return '📦 משלוח חינמי, מהיר וללא מכס מהמחסן בארץ';
   else if (rawText.includes('משלוח חינם'))
     return '📦 משלוח חינם';
   else if (rawText.includes('₪'))
