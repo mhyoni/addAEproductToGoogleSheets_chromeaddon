@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     })
       .then(() => {
         console.log("✅ נשלח ל־Webhook של עדכון");
-        // window.close();
+        window.close();
       })
       .catch((err) => console.error("❌ שגיאה בשליחה ל־Webhook של עדכון:", err));
   }
@@ -459,51 +459,102 @@ async function runNewItem() {
 };
 
 simple = false;
+function parseMaybeJson(text) {
+  try { return JSON.parse(text); } catch { return { ok: true, raw: text }; }
+}
+
 function sendToWebhook(data) {
   if (simple) {
     const url = 'https://hook.eu2.make.com/jmow52wzuan9e9kcdm8m32afq9wprxxu';
     fetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     })
-      .then(res => res.json())
-      .then(response => {
-        const closeButton = document.querySelector('.next-balloon-close');
-        if (closeButton) {
-          closeButton.click(); // לוחץ עליו
-        } else {
-          console.warn('❌ לא נמצא האלמנט עם next-balloon-close');
-        }
-
-        alert(response.value); // ok
-        // console.log(response.value); // 123.45
-      })
-
-      .catch(error => {
-        console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
-      });
-  }
-
-  else {
+    .then(async res => {
+      const t = await res.text();
+      const payload = parseMaybeJson(t);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${t}`);
+      alert(payload.value ?? 'ok');
+    })
+    .catch(err => console.error('❌ שגיאה בשליחת הנתונים ל־Make:', err));
+  } else {
     fetch(window.WEBHOOK_CREATE_PHASE_1, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     })
-      .then(res => res.json())
-      .then(gptData => {
-        // debugger;
-        showEditForm(gptData); // מציג את הטופס לעריכה
-      })
-      .catch(err => {
-        console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
-        alert("לא התקבלה תשובה מ־Make");
-      });
+    .then(async res => {
+      const t = await res.text();               // קודם טקסט
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${t}`);
+      // טיפול בבקרת שורות לא חוקיות אם Make מחזיר שורות גולמיות
+      const safe = t.replace(/[\r\n]+/g, "\\n");
+      return parseMaybeJson(safe);
+    })
+    .then(gptData => {
+      if (!gptData || (!gptData.title && !gptData.description)) {
+        throw new Error("תשובה לא צפויה מ־Make");
+      }
+      showEditForm(gptData);
+    })
+    .catch(err => {
+      console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
+      alert("לא התקבלה תשובה תקינה מ־Make");
+    });
   }
 }
+
+// function sendToWebhook(data) {
+//   if (simple) {
+//     const url = 'https://hook.eu2.make.com/jmow52wzuan9e9kcdm8m32afq9wprxxu';
+//     fetch(url, {
+//       method: 'POST',
+//       body: JSON.stringify(data),
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//       .then(res => res.json())
+//       .then(response => {
+//         const closeButton = document.querySelector('.next-balloon-close');
+//         if (closeButton) {
+//           closeButton.click(); // לוחץ עליו
+//         } else {
+//           console.warn('❌ לא נמצא האלמנט עם next-balloon-close');
+//         }
+
+//         alert(response.value); // ok
+//         // console.log(response.value); // 123.45
+//       })
+
+//       .catch(error => {
+//         console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
+//       });
+//   }
+
+//   else {
+//     fetch(window.WEBHOOK_CREATE_PHASE_1, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(data)
+//     })
+//       .then(res => {
+//         res.json();
+//         console.log(`res: ${JSON.stringify(res)}`);
+//       })
+//       .then(gptData => {
+//         // debugger;
+//         // gptData.title="title";
+//         // gptData.description="desc";
+//         // gptData.rownumber="1";
+//         showEditForm(gptData); // מציג את הטופס לעריכה
+//       })
+//       .catch(err => {
+//         console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
+//         alert("לא התקבלה תשובה מ־Make");
+//       });
+//   }
+// }
 
 
 //המשך עם טופס לעריכת כותרת ותיאור מצאט גפט
