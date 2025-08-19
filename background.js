@@ -9,6 +9,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       const row = params.get("row") || "";
       const gid = params.get("gid") || "";
       const sheetName = decodeURIComponent(params.get("sheetName") || "");
+      const chatgpt = params.get("chatgpt") || "";
 
       chrome.scripting.executeScript({
         target: { tabId: tabId },
@@ -21,7 +22,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             sheetId,
             row,
             gid,
-            sheetName
+            sheetName,
+            chatgpt
           });
         }, 500); // חצי שנייה – לרוב מספיק
       });

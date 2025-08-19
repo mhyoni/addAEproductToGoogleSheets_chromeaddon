@@ -15,13 +15,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.type === "AUTO_UPDATE") {
-    console.log("🚀 הפעלה אוטומטית בזיהוי update=1");
-
+    // console.log("🚀 הפעלה אוטומטית בזיהוי update=1");
     const data = await getFullProductData(true);
     data.rownumber = request.row;
     data.gid = request.gid;
     data.sheetname = request.sheetName;
     data.sheetId = request.sheetId;
+    data.chatgpt = request.chatgpt;
     console.log(data);
 
     fetch(window.WEBHOOK_REFRESH_DATA, {
@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     })
       .then(() => {
         console.log("✅ נשלח ל־Webhook של עדכון");
-        window.close();
+        // window.close();
       })
       .catch((err) => console.error("❌ שגיאה בשליחה ל־Webhook של עדכון:", err));
   }
@@ -79,7 +79,7 @@ function getDiscount() {
 function getDirectCommission() {
   const labels = document.querySelectorAll('.commissions .label');
   for (const label of labels) {
-    if (label.innerText.includes('אומדן עמלה מקישור ישיר')) {
+    if (label.innerText.includes('אומדן עמלה מקישור ישיר') || label.innerText.includes('Estimated direct linking commission')) {
       const valueSpan = label.nextElementSibling;
       if (valueSpan) {
         const raw = valueSpan.innerText.replace('%', '').trim();
@@ -209,7 +209,7 @@ function clickGetLinkAndExtractUrl() {
     let targetButton = null;
 
     for (const btn of buttons) {
-      if (btn.innerText && btn.innerText.includes('לקבל קישור כ')) {
+      if (btn.innerText && (btn.innerText.includes('לקבל קישור כ') || btn.innerText.includes('Get link'))) {
         targetButton = btn;
         break;
       }
@@ -300,7 +300,7 @@ function clickAllShowMoreButtons() {
         btn.classList.contains('extend--btn--TWsP5SV')
       )
     ) {
-      console.log('🔘 לוחץ על כפתור:', btn);
+      // console.log('🔘 לוחץ על כפתור:', btn);
       btn.click();
     }
   });
@@ -337,26 +337,73 @@ function getFormattedShippingInfo() {
 
   // אם יש סימן ₪ – המשלוח בתשלום
 
-  if (rawText.includes('חינם ברכישה מעל'))
+  if (rawText.includes('חינם ברכישה מעל') || rawText.includes('Free pick-up over'))
     return '📦 משלוח חינם מעל 42 ₪';
-  else if (rawText.includes('איסוף חינם'))
+  else if (rawText.includes('איסוף חינם') || rawText.includes('Free pick-up'))
     return '📦 משלוח חינם';
-  else if (rawText.includes('משלוח חינם') && rawText.includes('מ Israel'))
+  else if (
+    (rawText.includes('משלוח חינם') && rawText.includes('מ Israel')) || (rawText.includes('Free shipping') && rawText.includes('Ship from Israel')))
     return '📦 משלוח חינמי, מהיר וללא מכס מהמחסן בארץ';
-  else if (rawText.includes('משלוח חינם'))
+  else if (rawText.includes('משלוח חינם') || rawText.includes('Free shipping'))
     return '📦 משלוח חינם';
   else if (rawText.includes('₪'))
     return '';
   return '';// ברירת מחדל
 }
 
+function isProdInAffProg() {
+  let msg = null;
+  msg = document.querySelectorAll('div.message-content')[0];
+  if (msg && (msg.textContent === 'מוצר זה אינו כשיר כעת לתוכנית השותפים או שאינו זמין במדינה שבחרת' || msg.textContent === 'This item is currently not eligible for the affiliate program or not available in your selected country/region'))
+    return 0;
+  else
+    return 1;
+}
+
+function isShippingToIsrael() {
+  // const xpath = "//span[contains(text(), 'לא ניתן לשלוח')]";
+  const xpath = "//span[contains(text(), 'לא ניתן לשלוח') or contains(text(), \"This product can't be shipped to your address.\")]";
+
+  const result = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  );
+  let el = null;
+  el = result.singleNodeValue;
+  if (el) {
+    console.log(el.textContent);
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+
+function isLinkGood() {
+  const el = document.querySelector(".not-found--desc--fg3tUXp");
+  const bodyText = document.body.innerText;
+
+  if (
+    (el && el.textContent.includes("page you requested can not be found")) ||
+    bodyText.includes("מצטערים, פריט זה אינו זמין כרגע במיקומכם")
+  ) {
+    console.log("❌ הודעת שגיאה זוהתה (Not Found או פריט לא זמין)");
+    return 0;
+  } else {
+    console.log("✅ הדף תקין, לא נמצאו הודעות שגיאה");
+    return 1;
+  }
+}
+
+
+
 // פונקציה ראשית שמחזירה את כל המידע
 async function getFullProductData(update = false) {
   const data = {};
   if (!update) {
-    const nameEl = document.querySelector('h1[data-pl="product-title"]');
-    data.product_name = nameEl ? nameEl.innerText.trim() : null;
-    data.desc = getDescription();
     try {
       data.affiliate_link = await clickGetLinkAndExtractUrl(); // תחכה כאן עד שמתקבל קישור
     } catch (err) {
@@ -365,6 +412,9 @@ async function getFullProductData(update = false) {
     }
   }
 
+  const nameEl = document.querySelector('h1[data-pl="product-title"]');
+  data.product_name = nameEl ? nameEl.innerText.trim() : null;
+  data.desc = getDescription();
   data.rating = getRatingFromText();
   // data.sales = getUnitsSold();
   data.sales = getRoundedSales();
@@ -374,7 +424,9 @@ async function getFullProductData(update = false) {
   data.commission = getDirectCommission();
   data.video = getVideoUrl();
   data.img = getMainImageUrl();
-
+  data.inAffProg = isProdInAffProg();
+  data.isShippingToIsrael = isShippingToIsrael();
+  data.linkIsGood = isLinkGood();
   return data;
 }
 
@@ -427,7 +479,7 @@ function sendToWebhook(data) {
         }
 
         alert(response.value); // ok
-        console.log(response.value); // 123.45
+        // console.log(response.value); // 123.45
       })
 
       .catch(error => {
@@ -501,7 +553,7 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
         div.remove();
 
         alert(response.value); // ok
-        console.log(response.value); // 123.45
+        // console.log(response.value); // 123.45
       })
       // .then(() => {
       //   alert("✅ נשמר בהצלחה!");
