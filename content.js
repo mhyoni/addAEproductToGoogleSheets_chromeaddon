@@ -374,7 +374,7 @@ function isShippingToIsrael() {
   let el = null;
   el = result.singleNodeValue;
   if (el) {
-    console.log(el.textContent);
+    // console.log(el.textContent);
     return 0;
   }
   else {
