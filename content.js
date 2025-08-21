@@ -343,7 +343,7 @@ function getFormattedShippingInfo() {
     return '📦 משלוח חינם';
   else if (
     (rawText.includes('משלוח חינם') && rawText.includes('מ Israel')) || (rawText.includes('Free shipping') && rawText.includes('Ship from Israel')))
-    return '📦 משלוח חינמי, מהיר וללא מכס מהמחסן בארץ';
+    return '📦 משלוח חינמי, מהיר וללא מכס מהמחסן בארץ 🇮🇱';
   else if (rawText.includes('משלוח חינם') || rawText.includes('Free shipping'))
     return '📦 משלוח חינם';
   else if (rawText.includes('₪'))
@@ -567,14 +567,14 @@ function showEditForm(gptData) {
   // יצירת אלמנט
   const div = document.createElement("div");
   div.innerHTML = `<div id="alix-editor-popup" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%);
-background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-shadow: 0 0 10px rgba(0,0,0,0.3); max-width: 600px; width: 90%;">
+background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-shadow: 0 0 10px rgba(0,0,0,0.3); max-width: 600px; width: 90%; direction: rtl;">
   <h2 style="margin-top: 0; font-size: 18px;">✍️ ערוך לפני שליחה</h2>
   <label style="font-weight: bold;">שורה:</label><br/>
   <input id="alix-row" type="text" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px; margin-bottom: 10px;"><br/>
   <label style="font-weight: bold;">כותרת:</label><br/>
   <input id="alix-title" type="text" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px; margin-bottom: 10px;"><br/>
   <label style="font-weight: bold;">תיאור:</label><br/>
-  <textarea id="alix-desc" rows="6" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px;"></textarea><br/>
+  <textarea id="alix-desc" rows="6" style="width: 100%; background: darkblue; color: yellow; padding: 10px; border-radius: 10px; direction: rtl;"></textarea><br/>
   <button id="alix-submit" style="margin-top: 10px; padding: 6px 12px; background-color: #4CAF50; color: white; border: none;">שמור ושלח</button>
   <button id="alix-cancel" style="margin-top: 10px; padding: 6px 12px; background-color: #ccc; border: none;">ביטול</button>
 </div>`;
