@@ -118,6 +118,21 @@ function getVideoUrl() {
 //   return null;
 // }
 
+
+function getProductId() {
+  // מוצא את התגית meta עם המאפיין המתאים
+  const metaTag = document.querySelector('meta[property="al:android:url"]');
+  if (!metaTag) return null;
+
+  // לוקח את הכתובת מה־content
+  const content = metaTag.getAttribute('content');
+  if (!content) return null;
+
+  // מחפש את ה־productId בעזרת RegExp
+  const match = content.match(/productId=(\d+)/);
+  return match ? match[1] : null;
+}
+
 function getRatingFromText() {
   const strongs = document.querySelectorAll('strong');
   for (const el of strongs) {
@@ -354,7 +369,7 @@ function getFormattedShippingInfo() {
 function isProdInAffProg() {
   let msg = null;
   msg = document.querySelectorAll('div.message-content')[0];
-  if (msg && (msg.textContent === 'מוצר זה אינו כשיר כעת לתוכנית השותפים או שאינו זמין במדינה שבחרת' || msg.textContent === 'This item is currently not eligible for the affiliate program or not available in your selected country/region'))
+  if (msg && (msg.textContent === 'מוצר זה אינו כשיר כעת לתוכנית השותפים או שאינו זמין במדינה שבחרת' || msg.textContent === 'This item is currently not eligible for the affiliate program or not available in your selected country/region' || msg.textContent === "מצטערים, פריט זה אינו זמין כרגע במיקומכם." || msg.textContent === "Sorry, this item's currently unavailable in your location."))
     return 0;
   else
     return 1;
@@ -427,6 +442,7 @@ async function getFullProductData(update = false) {
   data.inAffProg = isProdInAffProg();
   data.isShippingToIsrael = isShippingToIsrael();
   data.linkIsGood = isLinkGood();
+  data.productID = getProductId();
   return data;
 }
 
