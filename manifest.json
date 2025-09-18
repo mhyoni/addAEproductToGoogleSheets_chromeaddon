@@ -5,6 +5,17 @@
   "version": "1.0",
   "permissions": ["scripting", "activeTab"],
   "host_permissions": ["https://*.aliexpress.com/*"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.aliexpress.com/item/*",
+        "https://aliexpress.com/item/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_title": "שלוף נתונים",
     "default_icon": "icon.png"
