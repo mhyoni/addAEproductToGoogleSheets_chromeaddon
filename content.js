@@ -556,6 +556,37 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
   document.getElementById("alix-row").value = gptData.rownumber || "";
 
   // האזנה ללחצנים
+  // document.getElementById("alix-submit").onclick = () => {
+  //   const updated = {
+  //     title: document.getElementById("alix-title").value.trim(),
+  //     description: document.getElementById("alix-desc").value.trim(),
+  //     rownumber: document.getElementById("alix-row").value.trim()
+  //   };
+
+  //   fetch(window.WEBHOOK_CREATE_PHASE_2, {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify(updated)
+  //   })
+  //     // .then(res => res.json())
+  //     .then(async res => {
+  //       if (!res.ok) {
+  //         throw new Error(`HTTP ${res.status}`);
+  //       }
+  //       const response = await res.json();
+  //       div.remove();
+  //       alert(response.value || 'נשלח בהצלחה');
+  //     })
+  //     .then(response => {
+  //       div.remove();
+  //       alert(response.value); // ok
+  //     })
+
+  //     .catch((err) => {
+  //       console.error("❌ שגיאה בשליחה:", err);
+  //       alert("שגיאה בשליחה ל-Make");
+  //     });
+  // };
   document.getElementById("alix-submit").onclick = () => {
     const updated = {
       title: document.getElementById("alix-title").value.trim(),
@@ -568,7 +599,6 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated)
     })
-      // .then(res => res.json())
       .then(async res => {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
@@ -577,16 +607,10 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
         div.remove();
         alert(response.value || 'נשלח בהצלחה');
       })
-      .then(response => {
-        div.remove();
-        alert(response.value); // ok
-      })
-
       .catch((err) => {
         console.error("❌ שגיאה בשליחה:", err);
         alert("שגיאה בשליחה ל-Make");
       });
   };
-
   document.getElementById("alix-cancel").onclick = () => div.remove();
 }
