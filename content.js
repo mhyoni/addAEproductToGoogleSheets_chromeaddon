@@ -2,27 +2,85 @@ window.WEBHOOK_CREATE_PHASE_1 = "https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte
 window.WEBHOOK_CREATE_PHASE_2 = "https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh";
 window.WEBHOOK_REFRESH_DATA = "https://hook.eu2.make.com/m2059yc72x5atvsdesflldpojs6khgyr";
 
-// const WEBHOOK_CREATE_PHASE_1 = "https://hook.eu2.make.com/nvvuw23dqx14ez2iowmte56arq1ri4xq";
-// const WEBHOOK_REFRESH_DATA = "https://hook.eu2.make.com/m2059yc72x5atvsdesflldpojs6khgyr";
-// const WEBHOOK_CREATE_PHASE_2 = "https://hook.eu2.make.com/g5ewyinenljbb4f84yj1mkh8xwto1wfh"; // לשמירה אחרי עריכה
+(function autoUpdateFromUrl() {
+  try {
+    const url = new URL(location.href);
+    if (url.searchParams.get("update") !== "1") return;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // קורא את הפרמטרים מה-URL (כמו שעשית ב-background)
+    const sheetId = url.searchParams.get("id") || "";
+    const row = url.searchParams.get("row") || "";
+    const gid = url.searchParams.get("gid") || "";
+    const sheetName = url.searchParams.get("sheetName") ? decodeURIComponent(url.searchParams.get("sheetName")) : "";
+    const chatgpt = url.searchParams.get("chatgpt") || "";
+
+    (async () => {
+      const data = await getFullProductData(true); // לא מבקש קישור שותף במצב עדכון
+      data.rownumber = row;
+      data.gid = gid;
+      data.sheetname = sheetName;
+      data.sheetId = sheetId;
+      data.chatgpt = chatgpt;
+
+      fetch(window.WEBHOOK_REFRESH_DATA, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then(() => {
+          console.log("✅ נשלח ל־Webhook של עדכון (content.js)");
+          // אם תרצה: window.close();
+        })
+        .catch((err) => console.error("❌ שגיאה בשליחה ל־Webhook של עדכון (content.js):", err));
+    })();
+  } catch (e) {
+    console.warn("autoUpdateFromUrl error", e);
+  }
+})();
+
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//   if (request.type === "MANUAL_EXTRACTION") {
+//     runManualExtraction();
+//   }
+// });
+
+
+// chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+//   if (request.type === "AUTO_UPDATE") {
+//     // console.log("🚀 הפעלה אוטומטית בזיהוי update=1");
+//     const data = await getFullProductData(true);
+//     data.rownumber = request.row;
+//     data.gid = request.gid;
+//     data.sheetname = request.sheetName;
+//     data.sheetId = request.sheetId;
+//     data.chatgpt = request.chatgpt;
+//     console.log(data);
+
+//     fetch(window.WEBHOOK_REFRESH_DATA, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(data)
+//     })
+//       .then(() => {
+//         console.log("✅ נשלח ל־Webhook של עדכון");
+//         window.close();
+//       })
+//       .catch((err) => console.error("❌ שגיאה בשליחה ל־Webhook של עדכון:", err));
+//   }
+// });
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.type === "MANUAL_EXTRACTION") {
     runManualExtraction();
+    return true;
   }
-});
 
-
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.type === "AUTO_UPDATE") {
-    // console.log("🚀 הפעלה אוטומטית בזיהוי update=1");
     const data = await getFullProductData(true);
     data.rownumber = request.row;
     data.gid = request.gid;
     data.sheetname = request.sheetName;
     data.sheetId = request.sheetId;
     data.chatgpt = request.chatgpt;
-    console.log(data);
 
     fetch(window.WEBHOOK_REFRESH_DATA, {
       method: "POST",
@@ -34,9 +92,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         window.close();
       })
       .catch((err) => console.error("❌ שגיאה בשליחה ל־Webhook של עדכון:", err));
+
+    return true;
   }
 });
-
 
 
 function getPrice() {
@@ -49,12 +108,6 @@ function getPrice() {
   const price = Math.round(parseFloat(span.innerText.replace(/[^\d.]/g, '')));
   return price;
 }
-
-// function getDiscount() {
-//   const discountEl = document.querySelector('span.price--discount--Y9uG2LK');
-//   if (!discountEl) return null;
-//   return parseInt(discountEl.innerText.replace('הנחה', '').replace('%', '').trim());
-// }
 
 function getDiscount() {
   // ניסיון ראשון – הסלקטור שלך
@@ -74,7 +127,6 @@ function getDiscount() {
 
   return null;
 }
-
 
 function getDirectCommission() {
   const labels = document.querySelectorAll('.commissions .label');
@@ -105,19 +157,6 @@ function getVideoUrl() {
   }
   return null;
 }
-
-
-// function getVideoUrl() {
-//   const videoEl = document.querySelector('video.video--video--bsRAdyg');
-//   if (videoEl) {
-//     const sourceEl = videoEl.querySelector('source');
-//     if (sourceEl && sourceEl.src) {
-//       return sourceEl.src;
-//     }
-//   }
-//   return null;
-// }
-
 
 function getProductId() {
   // מוצא את התגית meta עם המאפיין המתאים
@@ -177,47 +216,6 @@ function getRoundedSales() {
   return num;
 }
 
-// המתנה אלמנט עם תוכן
-// function clickGetLinkAndExtractUrl() {
-//   return new Promise((resolve, reject) => {
-//     const buttons = document.querySelectorAll('[class*="btn"]');
-//     let targetButton = null;
-
-//     for (const btn of buttons) {
-//       if (btn.innerText && btn.innerText.includes('לקבל קישור כ')) {
-//         targetButton = btn;
-//         break;
-//       }
-//     }
-
-//     if (!targetButton) {
-//       console.warn('⚠️ לא נמצא כפתור עם הטקסט "לקבל קישור כ"');
-//       return reject('כפתור לא נמצא');
-//     }
-
-//     targetButton.click();
-
-//     let tries = 0;
-//     const maxTries = 20;
-
-//     const interval = setInterval(() => {
-//       const inputs = document.querySelectorAll('[value^="https://s.click.aliexpress.com/e/"]');
-
-//       if (inputs.length > 0) {
-//         clearInterval(interval);
-//         const link = inputs[0].value.trim();
-//         console.log('✅ קישור שותף נמצא:', link);
-//         resolve(link); // כאן הוא מחזיר את הקישור
-//       }
-
-//       tries++;
-//       if (tries >= maxTries) {
-//         clearInterval(interval);
-//         reject('⏰ Timeout: לא נמצא קישור שותף');
-//       }
-//     }, 300);
-//   });
-// }
 function clickGetLinkAndExtractUrl() {
   return new Promise((resolve, reject) => {
     const buttons = document.querySelectorAll('[class*="btn"]');
@@ -315,15 +313,24 @@ function clickAllShowMoreButtons() {
         btn.classList.contains('extend--btn--TWsP5SV')
       )
     ) {
-      // console.log('🔘 לוחץ על כפתור:', btn);
       btn.click();
     }
   });
 }
 
+// function getDescription() {
+//   clickAllShowMoreButtons();
+//   return extractSellpointsText() + "\n" + extractFullSpecificationText() + "\n" + extractFullProductDescriptionText();
+// }
 function getDescription() {
   clickAllShowMoreButtons();
-  return extractSellpointsText() + "\n" + extractFullSpecificationText() + "\n" + extractFullProductDescriptionText();
+  const parts = [
+    extractSellpointsText(),
+    extractFullSpecificationText(),
+    extractFullProductDescriptionText()
+  ].filter(part => part && part !== 'null');
+
+  return parts.join("\n") || '';
 }
 
 function extractShippingInfoText() {
@@ -474,7 +481,7 @@ async function runNewItem() {
   sendToWebhook(data);
 };
 
-simple = false;
+let simple = false;
 function parseMaybeJson(text) {
   try { return JSON.parse(text); } catch { return { ok: true, raw: text }; }
 }
@@ -487,95 +494,41 @@ function sendToWebhook(data) {
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' }
     })
-    .then(async res => {
-      const t = await res.text();
-      const payload = parseMaybeJson(t);
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${t}`);
-      alert(payload.value ?? 'ok');
-    })
-    .catch(err => console.error('❌ שגיאה בשליחת הנתונים ל־Make:', err));
+      .then(async res => {
+        const t = await res.text();
+        const payload = parseMaybeJson(t);
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${t}`);
+        alert(payload.value ?? 'ok');
+      })
+      .catch(err => console.error('❌ שגיאה בשליחת הנתונים ל־Make:', err));
   } else {
     fetch(window.WEBHOOK_CREATE_PHASE_1, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     })
-    .then(async res => {
-      const t = await res.text();               // קודם טקסט
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${t}`);
-      // טיפול בבקרת שורות לא חוקיות אם Make מחזיר שורות גולמיות
-      const safe = t.replace(/[\r\n]+/g, "\\n");
-      return parseMaybeJson(safe);
-    })
-    .then(gptData => {
-      if (!gptData || (!gptData.title && !gptData.description)) {
-        throw new Error("תשובה לא צפויה מ־Make");
-      }
-      showEditForm(gptData);
-    })
-    .catch(err => {
-      console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
-      alert("לא התקבלה תשובה תקינה מ־Make");
-    });
+      .then(async res => {
+        const t = await res.text();               // קודם טקסט
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${t}`);
+        // טיפול בבקרת שורות לא חוקיות אם Make מחזיר שורות גולמיות
+        const safe = t.replace(/[\r\n]+/g, "\\n");
+        return parseMaybeJson(safe);
+      })
+      .then(gptData => {
+        if (!gptData || (!gptData.title && !gptData.description)) {
+          throw new Error("תשובה לא צפויה מ־Make");
+        }
+        showEditForm(gptData);
+      })
+      .catch(err => {
+        console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
+        alert("לא התקבלה תשובה תקינה מ־Make");
+      });
   }
 }
 
-// function sendToWebhook(data) {
-//   if (simple) {
-//     const url = 'https://hook.eu2.make.com/jmow52wzuan9e9kcdm8m32afq9wprxxu';
-//     fetch(url, {
-//       method: 'POST',
-//       body: JSON.stringify(data),
-//       headers: {
-//         'Content-Type': 'application/json'
-//       }
-//     })
-//       .then(res => res.json())
-//       .then(response => {
-//         const closeButton = document.querySelector('.next-balloon-close');
-//         if (closeButton) {
-//           closeButton.click(); // לוחץ עליו
-//         } else {
-//           console.warn('❌ לא נמצא האלמנט עם next-balloon-close');
-//         }
-
-//         alert(response.value); // ok
-//         // console.log(response.value); // 123.45
-//       })
-
-//       .catch(error => {
-//         console.error('❌ שגיאה בשליחת הנתונים ל־Make:', error);
-//       });
-//   }
-
-//   else {
-//     fetch(window.WEBHOOK_CREATE_PHASE_1, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(data)
-//     })
-//       .then(res => {
-//         res.json();
-//         console.log(`res: ${JSON.stringify(res)}`);
-//       })
-//       .then(gptData => {
-//         // debugger;
-//         // gptData.title="title";
-//         // gptData.description="desc";
-//         // gptData.rownumber="1";
-//         showEditForm(gptData); // מציג את הטופס לעריכה
-//       })
-//       .catch(err => {
-//         console.error("❌ שגיאה בקבלת התשובה מ־Make:", err);
-//         alert("לא התקבלה תשובה מ־Make");
-//       });
-//   }
-// }
-
-
 //המשך עם טופס לעריכת כותרת ותיאור מצאט גפט
 function showEditForm(gptData) {
-  // gptData = JSON.parse(gptData);
   // הסרת טופס קודם אם קיים
   const oldForm = document.getElementById("alix-editor-popup");
   if (oldForm) oldForm.remove();
@@ -615,17 +568,20 @@ background: white; z-index: 9999; padding: 20px; border: 2px solid #999; box-sha
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated)
     })
-      .then(res => res.json())
+      // .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const response = await res.json();
+        div.remove();
+        alert(response.value || 'נשלח בהצלחה');
+      })
       .then(response => {
         div.remove();
-
         alert(response.value); // ok
-        // console.log(response.value); // 123.45
       })
-      // .then(() => {
-      //   alert("✅ נשמר בהצלחה!");
-      //   div.remove();
-      // })
+
       .catch((err) => {
         console.error("❌ שגיאה בשליחה:", err);
         alert("שגיאה בשליחה ל-Make");
